@@ -1,0 +1,9 @@
+FROM ubuntu:latest
+
+WORKDIR /app
+
+COPY wordpress-setup.sh /app/wordpress-setup.sh
+
+RUN chmod +x /app/wordpress-setup.sh
+RUN /app/wordpress-setup.sh example.com
+CMD ["/bin/bash", "/app/wordpress-setup.sh", "example.com"]

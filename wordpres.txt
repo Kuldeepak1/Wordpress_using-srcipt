@@ -1,0 +1,120 @@
+#! /bin/bash
+
+echo "Shell script to install apache/mysql/php/wordpress into an EC2 instance of Amazon AMI Linux."
+echo "Please run as root, if you're not, choose N now and enter 'sudo su' before running the script."
+echo "Run script? (y/n)"
+
+read -e run
+if [ "$run" == n ] ; then
+echo “Installation aborted...”
+exit
+else
+echo "Installation started"
+
+
+
+
+
+
+
+apt update && apt upgrade -y
+
+# install apache2
+apt install apache2 -y
+
+#restart the apache 2
+systemctl restart apache2
+
+apt install expect -y
+#check apache installed successfully with https://ipadress
+
+apt install mariadb-server mariadb-client -y
+
+#now secure our MariaDB database engine and disallow remote root login (change root password:n,remove anonymous users:Y, allow root login remotely:y,remove #test db: y, reload previlage tables:y)
+
+mysql_secure_installation
+
+SECURE_MYSQL=$(expect -c "
+ 
+set timeout 10
+spawn mysql_secure_installation
+ 
+expect \"Enter current password for root (enter for none):\"
+send \"\r\"
+ 
+expect \"Change the root password?\"
+send \"y\r\"
+expect \"New password:\"
+send \"password\r\"
+expect \"Re-enter new password:\"
+send \"password\r\"
+expect \"Remove anonymous users?\"
+send \"y\r\"
+ 
+expect \"Disallow root login remotely?\"
+send \"y\r\"
+ 
+expect \"Remove test database and access to it?\"
+send \"y\r\"
+ 
+expect \"Reload privilege tables now?\"
+send \"y\r\"
+ 
+expect eof
+")
+ 
+echo "$SECURE_MYSQL"
+
+#install Php
+
+apt install php php-mysql -y
+
+echo"<?php \n phpinfo(); \n ?>" /var/www/html/info.php
+
+#check php installed with https://ip-address/info.php
+
+#create wordpress DB
+
+mysql -u root -p
+
+CREATE DATABASE wordpress_db;
+
+CREATE USER 'wp_user'@'localhost' IDENTIFIED BY 'password';
+
+GRANT ALL ON wordpress_db.* TO 'wp_user'@'localhost' IDENTIFIED BY 'password';
+
+FLUSH PRIVILEGES;
+
+Exit;
+
+# Install WordPress CMS
+
+#Go to your temp directory and download the latest WordPress File
+
+cd /tmp && wget https://wordpress.org/latest.tar.gz
+
+tar -xvf latest.tar.gz
+
+#Copy the wordpress folder to /var/www/html/ path.
+
+cp -R wordpress /var/www/html/
+
+#Run the command below to change ownership of ‘wordpress’ directory.
+
+chown -R www-data:www-data /var/www/html/wordpress/
+
+#change File permissions of the WordPress folder.
+
+chmod -R 755 /var/www/html/wordpress/
+
+#Create ‘uploads’ directory.
+
+mkdir /var/www/html/wordpress/wp-content/uploads
+
+#change permissions of ‘uploads’ directory
+
+chown -R www-data:www-data /var/www/html/wordpress/wp-content/uploads/
+
+#Open your browser and go to the server’s URL : https://server-ip/wordpress
+
+

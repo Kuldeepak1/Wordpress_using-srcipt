@@ -1,0 +1,10 @@
+define( 'DB_NAME', 'kuldeepak1' );
+
+/** Database username */
+define( 'DB_USER', 'root' );
+
+/** Database password */
+define( 'DB_PASSWORD', 'root_password' );
+
+/** Database hostname */
+define( 'DB_HOST', 'localhost' );
